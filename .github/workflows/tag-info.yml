@@ -54,7 +54,7 @@ jobs:
 
       - name: Get Current Patch Number
         run: |
-          GITHUB_TAG_PATTERN="${TECHNICAL_VERSION}.*${PRE_RELEASE_TAG}+$(date +%y%j)[0-9]*"
+          GITHUB_TAG_PATTERN="${TECHNICAL_VERSION}.[0-9]*${PRE_RELEASE_TAG}+$(date +%y%j)[0-9]*"
           GITHUB_TAG=$(git describe --tags --abbrev=0 --match="${GITHUB_TAG_PATTERN}" 2>/dev/null | awk 'NR==1{print $1}')
 
           echo "GITHUB_TAG_PATTERN=$GITHUB_TAG_PATTERN"
@@ -63,7 +63,7 @@ jobs:
           if [ -z "$GITHUB_TAG" ]; then
             PATCH_NUMBER=-1
           else
-            PATCH_NUMBER=$(echo $GITHUB_TAG | sed -E "s/.*\.([0-9]+)($PRE_RELEASE_TAG)?\+[0-9]{5}([0-9]*)/\1/")
+            PATCH_NUMBER=$(echo $GITHUB_TAG | sed -E "s/[[:digit:]]*\.[[:digit:]]*\.([[:digit:]]*)($PRE_RELEASE_TAG)?\+[[:digit:]]*/\1/")
           fi
 
           echo "PATCH_NUMBER=$PATCH_NUMBER" >> $GITHUB_ENV
@@ -93,7 +93,7 @@ jobs:
             BUILD_NO=1
           else
             BUILD_NO=$(echo $GITHUB_TAG | sed -E "s/.*\+${DATE_PATTERN}([0-9]*)/\1/")
-            BUILD_NO=$(( BUILD_NO + 1 ))
+            BUILD_NO=$((10#$BUILD_NO + 1))
             echo "Calculated BUILD_NO=$BUILD_NO"
           fi
 
@@ -122,12 +122,5 @@ jobs:
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
           tag="$BUILD_NAME"
-          oldtag=$(git tag -l $tag)
-
-          if [ ! -z $oldtag ]; then
-              git tag -d $tag
-              git push origin :refs/tags/$tag
-          fi
-
           git tag -a $tag -m "tagged by build"
           git push origin $tag
