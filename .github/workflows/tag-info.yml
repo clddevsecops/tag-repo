@@ -63,7 +63,7 @@ jobs:
             PATCH_NUMBER=-1
             echo "No previous tag found, setting PATCH_NUMBER to -1"
           else
-            PATCH_NUMBER=$(echo $GITHUB_TAG | sed -E "s/[[:digit:]]*\.[[:digit:]]*\.([[:digit:]]*)($PRE_RELEASE_TAG)?\+[[:digit:]]*/\1/")
+            PATCH_NUMBER=$(echo $GITHUB_TAG | sed -E "s/[[:digit:]]*\.[[:digit:]]*\.([[:digit:]]*)${PRE_RELEASE_TAG}\+[[:digit:]]{5}[[:digit:]]*/\1/")
             echo "Extracted PATCH_NUMBER=$PATCH_NUMBER from tag $GITHUB_TAG"
           fi
 
@@ -86,7 +86,7 @@ jobs:
 
           VERSION_PREFIX="${TECHNICAL_VERSION}.${PATCH_NUMBER}${PRE_RELEASE_TAG}"
           DATE_PATTERN=$(date "+%y%j")
-          GITHUB_TAG_PATTERN="${VERSION_PREFIX}+${DATE_PATTERN}[0-9]*"
+          GITHUB_TAG_PATTERN="${VERSION_PREFIX}\+${DATE_PATTERN}[0-9]*"
           echo "New GITHUB_TAG_PATTERN=$GITHUB_TAG_PATTERN"
           GITHUB_TAG=$(git describe --tags --abbrev=0 --match="${GITHUB_TAG_PATTERN}" 2>/dev/null | awk 'NR==1{print $1}')
           echo "Found github tag=$GITHUB_TAG"
