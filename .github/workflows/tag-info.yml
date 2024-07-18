@@ -54,7 +54,7 @@ jobs:
 
       - name: Get Current Patch Number
         run: |
-          GITHUB_TAG_PATTERN="${TECHNICAL_VERSION}.[0-9]*${PRE_RELEASE_TAG}+$(date +%y%j)[0-9]*"
+          GITHUB_TAG_PATTERN="${TECHNICAL_VERSION}.*${PRE_RELEASE_TAG}+$(date +%y%j)[0-9]*"
           GITHUB_TAG=$(git describe --tags --abbrev=0 --match="${GITHUB_TAG_PATTERN}" 2>/dev/null | awk 'NR==1{print $1}')
 
           echo "GITHUB_TAG_PATTERN=$GITHUB_TAG_PATTERN"
@@ -63,7 +63,7 @@ jobs:
           if [ -z "$GITHUB_TAG" ]; then
             PATCH_NUMBER=-1
           else
-            PATCH_NUMBER=$(echo $GITHUB_TAG | sed -E "s/[[:digit:]]*\.[[:digit:]]*\.([[:digit:]]*)($PRE_RELEASE_TAG)?\+[[:digit:]]*/\1/")
+            PATCH_NUMBER=$(echo $GITHUB_TAG | sed -E "s/.*\.([0-9]+)($PRE_RELEASE_TAG)?\+[0-9]{5}([0-9]*)/\1/")
           fi
 
           echo "PATCH_NUMBER=$PATCH_NUMBER" >> $GITHUB_ENV
@@ -92,14 +92,14 @@ jobs:
           if [ -z "$GITHUB_TAG" ]; then
             BUILD_NO=1
           else
-            BUILD_NO=$(echo $GITHUB_TAG | sed -E "s/.*\.${DATE_PATTERN}([[:digit:]]*)/\1/")
+            BUILD_NO=$(echo $GITHUB_TAG | sed -E "s/.*\+${DATE_PATTERN}([0-9]*)/\1/")
             BUILD_NO=$(( BUILD_NO + 1 ))
             echo "Calculated BUILD_NO=$BUILD_NO"
           fi
 
           echo "major-version=$MAJOR_VERSION" >> $GITHUB_OUTPUT
           echo "minor-version=$MINOR_VERSION" >> $GITHUB_OUTPUT
-          BUILD_NO="${DATE_PATTERN}${BUILD_NO}"
+          BUILD_NO="${DATE_PATTERN}$(printf "%03d" $BUILD_NO)"
           BUILD_NAME="${VERSION_PREFIX}.${BUILD_NO}"
           REGISTRY_PATH="appraisal-generic-local/iasWorld/$RELEASE_STREAM/$BUILD_NAME"
           REGISTRY_PATH_MSI="appraisal-generic-local/iasWorld/ExePrograms"
