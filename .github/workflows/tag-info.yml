@@ -122,12 +122,8 @@ jobs:
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
           tag="$BUILD_NAME"
-          oldtag=$(git tag -l $tag)
-
-          if [ ! -z $oldtag ]; then
-              git tag -d $tag
-              git push origin :refs/tags/$tag
-          fi
+          git push origin :refs/tags/$tag
+        
 
           git tag -a $tag -m "tagged by build"
           git push origin $tag
